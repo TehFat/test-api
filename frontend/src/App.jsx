@@ -1,9 +1,19 @@
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Route, Routes } from "react-router-dom"; // Remove BrowserRouter import
-import { Button, Box, Input, Stack, Text } from "@chakra-ui/react";
+import { keyframes } from "@emotion/react";
 
-const API_BASE = "http://localhost:5000/api/products"
+import { Box, Text } from "@chakra-ui/react";
+import ProductForm from "./components/ProductForm";
+import ProductList from "./components/ProductList";
+
+const gradient = keyframes`
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+`;
+
+const API_BASE = "http://localhost:5000/api/products";
 
 const App = () => {
   const [products, setProducts] = useState([]);
@@ -11,94 +21,64 @@ const App = () => {
   const [newProductPrice, setNewProductPrice] = useState(-1);
   const [newProductImage, setNewProductImage] = useState("");
 
-  // Fetch products from the backend API
   useEffect(() => {
-    axios.get(API_BASE)
-      .then(response => {
-        if (response.data.data && response.data.data.length > 0) { // response.data is axios default property, the response object from the serverside is {status:"",data:[]} so we need to access it using response.data.data
-          setProducts(response.data.data);
-        }
-      })
-      .catch(error => {
-        console.error("There was an error fetching the products!", error);
-      });
+    axios
+      .get(API_BASE)
+      .then((res) => setProducts(res.data.data || []))
+      .catch((err) => console.error("Fetch error:", err));
   }, []);
 
-  // Add product
   const handleAddProduct = () => {
     if (!newProductName || !newProductPrice || newProductPrice === -1 || !newProductImage) return;
 
-    axios.post(API_BASE, { name: newProductName, price: newProductPrice, image: newProductImage })
-      .then(response => {
-        setProducts(prevProducts => [...prevProducts, response.data.data]);
+    axios
+      .post(API_BASE, {
+        name: newProductName,
+        price: newProductPrice,
+        image: newProductImage,
+      })
+      .then((res) => {
+        setProducts((prev) => [...prev, res.data.data]);
         setNewProductName("");
         setNewProductPrice(-1);
         setNewProductImage("");
       })
-      .catch(error => {
-        console.error("There was an error adding the product!", error);
-      });
+      .catch((err) => console.error("Add error:", err));
   };
 
-  // Delete product
   const handleDeleteProduct = (id) => {
-    axios.delete(`${API_BASE}/${id}`)
-      .then(() => {
-        setProducts(products.filter(product => product._id !== id));
-      })
-      .catch(error => {
-        console.error("There was an error deleting the product!", error);
-      });
+    axios
+      .delete(`${API_BASE}/${id}`)
+      .then(() => setProducts((prev) => prev.filter((p) => p._id !== id)))
+      .catch((err) => console.error("Delete error:", err));
   };
 
   return (
-    <Box p={4}>
-      <Text fontSize="2xl" fontWeight="bold">Product Management</Text>
-      <Stack direction="row" spacing={4} mt={4}>
-        <Input
-          placeholder="Enter product name"
-          value={newProductName}
-          onChange={(e) => setNewProductName(e.target.value)}
-        />
-      </Stack>
-      <Stack direction="row" spacing={4} mt={4}>
-        <Input
-          placeholder="Enter product price"
-          value={newProductPrice === -1 ? "" : newProductPrice}
-          type="number"
-          onChange={(e) => setNewProductPrice(e.target.value)}
-        />
-      </Stack>
-      <Stack direction="row" spacing={4} mt={4}>
-        <Input
-          placeholder="Enter product image"
-          value={newProductImage}
-          onChange={(e) => setNewProductImage(e.target.value)}
-        />
-      </Stack>
-      <Button onClick={handleAddProduct}>Add Product</Button>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Box mt={6}>
-              <Text fontSize="xl" mb={4}>Product List:</Text>
-              <Stack spacing={4}>
-                {products.map((product) => (
-                  <Box key={product._id} borderWidth="1px" borderRadius="lg" p={4}>
-                    <Text>{product.name}</Text>
-                    <Button colorScheme="red" onClick={() => handleDeleteProduct(product._id)}>
-                      Delete
-                    </Button>
-                  </Box>
-                ))}
-              </Stack>
-            </Box>
-          }
-        />
-      </Routes>
+    <Box  py={12} borderRadius="lg" p={4}  bgGradient="linear(to-r, teal.100, blue.100, pink.100)"
+    backgroundSize="400% 400%"
+    animation={`${gradient} 15s ease infinite`} mt={5}>
+      <Text fontSize="30" fontWeight="bold" textAlign="center">
+        Product Management
+      </Text>
+      <Text  py={5} fontSize="25" fontWeight="bold" textAlign="center">
+      Create Products List
+      </Text>
+
+      <ProductForm
+        newProductName={newProductName}
+        setNewProductName={setNewProductName}
+        newProductPrice={newProductPrice}
+        setNewProductPrice={setNewProductPrice}
+        newProductImage={newProductImage}
+        setNewProductImage={setNewProductImage}
+        handleAddProduct={handleAddProduct}
+       
+      />
+
+      <ProductList products={products} handleDeleteProduct={handleDeleteProduct} setProducts={setProducts} />
     </Box>
   );
 };
 
 export default App;
+

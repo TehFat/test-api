@@ -49,13 +49,14 @@ export const updateProduct = async (req, res) => {
     const { id } = req.params;
 
     const product = req.body;
-
+     // Check if the ID is valid
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ success:false, message: "please provide invalid product id"});  
     }
 
     try {
-       const updatedProdut = await Product.findByIdAndUpdate(id, product,{new:true});
+         // Find and update the product by ID
+       const updatedProdut = await Product.findByIdAndUpdate(id, product,{ new:true });
         res.status(200).json({ success: true, data: updatedProdut});
     } catch (error){
         // console.log("error in deleting product:", error.message);
