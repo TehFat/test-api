@@ -123,9 +123,10 @@ const ProductList = ({ products, handleDeleteProduct, setProducts }) => {
                         alt={product.name}
                         style={{
                           width: "200px",
-                          height: "200px",
+                          "min-height": "200px",
                           objectFit: "cover",
                           borderRadius: "8px",
+                          aspectRatio: "revert"
                         }}
                       />
                     </Box>
