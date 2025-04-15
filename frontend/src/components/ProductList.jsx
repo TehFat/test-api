@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback,useEffect } from "react";
 import axios from "axios";
 import {
   Box,
@@ -14,7 +14,16 @@ import {
 } from "@chakra-ui/react";
 import { DeleteIcon, EditIcon, CheckIcon, CloseIcon } from "@chakra-ui/icons";
 
-const ProductList = ({ products, handleDeleteProduct, setProducts }) => {
+import config from "../config";
+
+const ProductList = ({ handleDeleteProduct }) => {
+  const [products, setProducts] = useState([]);
+  useEffect(() => {
+    axios
+      .get(config.API_BASE)
+      .then((res) => setProducts(res.data.data || []))
+      .catch((err) => console.error("Fetch error:", err));
+  }, []);
   const [editingId, setEditingId] = useState(null);
   const [editedProduct, setEditedProduct] = useState({
     name: "",

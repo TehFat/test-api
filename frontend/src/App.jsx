@@ -19,17 +19,17 @@ const gradient = keyframes`
   100% { background-position: 0% 50%; }
 `;
 
-const API_BASE = "http://localhost:5000/api/products";
+import config from "./config";
 
 const App = () => {
-  const [products, setProducts] = useState([]);
+  
   const [newProductName, setNewProductName] = useState("");
   const [newProductPrice, setNewProductPrice] = useState(-1);
   const [newProductImage, setNewProductImage] = useState("");
 
   useEffect(() => {
     axios
-      .get(API_BASE)
+      .get(config.API_BASE)
       .then((res) => setProducts(res.data.data || []))
       .catch((err) => console.error("Fetch error:", err));
   }, []);
@@ -38,7 +38,7 @@ const App = () => {
     if (!newProductName || !newProductPrice || newProductPrice === -1 || !newProductImage) return;
     const fileData = await readFileAsDataUrl(newProductImage)
     axios
-      .post(API_BASE, {
+      .post(config.API_BASE, {
         name: newProductName,
         price: newProductPrice,
         image: fileData,
@@ -60,7 +60,7 @@ const App = () => {
 
   const handleDeleteProduct = (id) => {
     axios
-      .delete(`${API_BASE}/${id}`)
+      .delete(`${config.API_BASE}/${id}`)
       .then(() => setProducts((prev) => prev.filter((p) => p._id !== id)))
       .catch((err) => console.error("Delete error:", err));
   };
@@ -85,7 +85,7 @@ const App = () => {
         onResetForm={resetForm}
       />
 
-      <ProductList products={products} handleDeleteProduct={handleDeleteProduct} setProducts={setProducts} />
+      <ProductList handleDeleteProduct={handleDeleteProduct} />
     </Box>
   </>
   );
