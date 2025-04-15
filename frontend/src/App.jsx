@@ -2,12 +2,17 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { keyframes } from "@emotion/react";
-
-import { Box, Text } from "@chakra-ui/react";
+import { Helmet } from "react-helmet";
+import Header from "./components/Header"
+import { Box, Heading, Text } from "@chakra-ui/react";
 import ProductForm from "./components/ProductForm";
 import ProductList from "./components/ProductList";
 import { readFileAsDataUrl } from "./Helper/file-hepler.js";
 
+<Helmet>
+  <title>Product Management</title>
+  <meta name="description" content="Manage your product listings with image upload and pricing." />
+</Helmet>
 const gradient = keyframes`
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -61,15 +66,13 @@ const App = () => {
   };
 
   return (<>
-    <Box py={12} borderRadius="lg" p={4} bgGradient="linear(to-r, teal.100, blue.100, pink.100)"
-      backgroundSize="400% 400%"
-      animation={`${gradient} 15s ease infinite`} mt={5}>
-      <Text fontSize="30" fontWeight="bold" textAlign="center">
-        Product Management
-      </Text>
-      <Text py={5} fontSize="25" fontWeight="bold" textAlign="center">
+    <Header />
+    <Box as="main" role="main" py={12} borderRadius="lg" p={4} bgGradient="linear(to-r, teal.100, blue.100, pink.100)"
+      backgroundSize="400% 400%" animation={`${gradient} 15s ease infinite`} mt={5}>
+
+      <Heading py={5} fontSize="25" fontWeight="bold" textAlign="center">
         Create Products List
-      </Text>
+      </Heading>
 
       <ProductForm
         newProductName={newProductName}

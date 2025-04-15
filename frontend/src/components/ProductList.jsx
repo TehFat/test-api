@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import axios from "axios";
 import {
   Box,
@@ -10,6 +10,7 @@ import {
   Grid,
   GridItem,
   useColorModeValue,
+  Heading,
 } from "@chakra-ui/react";
 import { DeleteIcon, EditIcon, CheckIcon, CloseIcon } from "@chakra-ui/icons";
 
@@ -21,41 +22,39 @@ const ProductList = ({ products, handleDeleteProduct, setProducts }) => {
     image: "",
   });
 
-  const handleEdit = (product) => {
+  const handleEdit = useCallback((product) => {
     setEditingId(product._id);
     setEditedProduct({
       name: product.name,
       price: product.price,
       image: product.image || "",
     });
-  };
+  }, []);
 
-  const handleSave = (id) => {
+  const handleSave = useCallback(() => {
     axios
-      .put(`http://localhost:5000/api/products/${id}`, editedProduct)
+      .put(`http://localhost:5000/api/products/${editingId}`, editedProduct)
       .then((res) => {
-        const updatedProduct = res.data.data;
-        const updatedProducts = products.map((p) =>
-          p._id === id ? updatedProduct : p
+        const updated = res.data.data;
+        const updatedList = products.map((p) =>
+          p._id === editingId ? updated : p
         );
-        setProducts(updatedProducts);
+        setProducts(updatedList);
         setEditingId(null);
       })
-      .catch((err) => {
-        console.error("Update error:", err);
-      });
-  };
+      .catch((err) => console.error("Update error:", err));
+  }, [editedProduct, editingId, products, setProducts]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setEditingId(null);
     setEditedProduct({ name: "", price: "", image: "" });
-  };
+  }, []);
 
   return (
-    <Box mt={30} bg="blue.50">
-      <Text fontSize="30" fontWeight="bold" mb={4} textAlign="center">
+    <Box as="main" mt={10} bg="blue.50" px={4} py={6}>
+      <Heading as="h2" fontSize="2xl" mb={4} textAlign="center">
         Product List
-      </Text>
+      </Heading>
       <Grid
         bg={useColorModeValue("white", "gray.800")}
         templateColumns={{
@@ -64,7 +63,6 @@ const ProductList = ({ products, handleDeleteProduct, setProducts }) => {
           md: "repeat(3, 1fr)",
         }}
         gap={6}
-        justifyContent="center"
       >
         {products.map((product) => (
           <GridItem key={product._id}>
@@ -74,40 +72,44 @@ const ProductList = ({ products, handleDeleteProduct, setProducts }) => {
                   <Input
                     value={editedProduct.name}
                     onChange={(e) =>
-                      setEditedProduct({
-                        ...editedProduct,
+                      setEditedProduct((prev) => ({
+                        ...prev,
                         name: e.target.value,
-                      })
+                      }))
                     }
+                    placeholder="Product name"
                     mb={2}
                   />
                   <Input
                     value={editedProduct.price}
                     type="number"
                     onChange={(e) =>
-                      setEditedProduct({
-                        ...editedProduct,
+                      setEditedProduct((prev) => ({
+                        ...prev,
                         price: e.target.value,
-                      })
+                      }))
                     }
+                    placeholder="Price"
                     mb={2}
                   />
                   <Input
                     value={editedProduct.image}
                     onChange={(e) =>
-                      setEditedProduct({
-                        ...editedProduct,
+                      setEditedProduct((prev) => ({
+                        ...prev,
                         image: e.target.value,
-                      })
+                      }))
                     }
-                    placeholder="Enter new image URL"
+                    placeholder="Image URL"
                     mb={2}
                   />
                 </>
               ) : (
                 <>
-                  <Text fontWeight="bold">Name: {product.name}</Text>
-                  <Text>Price: ${product.price}</Text>
+                  <Text fontWeight="bold" mb={1}>
+                    Name: {product.name}
+                  </Text>
+                  <Text mb={2}>Price: ${product.price}</Text>
                   {product.image && (
                     <Box
                       mt={2}
@@ -121,12 +123,12 @@ const ProductList = ({ products, handleDeleteProduct, setProducts }) => {
                       <img
                         src={product.image}
                         alt={product.name}
+                        loading="lazy"
                         style={{
                           width: "200px",
-                          "min-height": "200px",
+                          height: "200px",
                           objectFit: "cover",
                           borderRadius: "8px",
-                          aspectRatio: "revert"
                         }}
                       />
                     </Box>
@@ -134,26 +136,26 @@ const ProductList = ({ products, handleDeleteProduct, setProducts }) => {
                 </>
               )}
 
-              <Stack direction="row" mt={2} justify="center">
+              <Stack direction="row" mt={4} justify="center">
                 <IconButton
                   icon={<DeleteIcon />}
                   colorScheme="red"
                   onClick={() => handleDeleteProduct(product._id)}
-                  aria-label="Delete"
+                  aria-label={`Delete ${product.name}`}
                 />
                 {editingId === product._id ? (
                   <>
                     <IconButton
                       icon={<CheckIcon />}
                       colorScheme="green"
-                      onClick={() => handleSave(product._id)}
-                      aria-label="Save"
+                      onClick={handleSave}
+                      aria-label="Save changes"
                     />
                     <IconButton
                       icon={<CloseIcon />}
                       colorScheme="gray"
                       onClick={handleCancel}
-                      aria-label="Cancel"
+                      aria-label="Cancel editing"
                     />
                   </>
                 ) : (
@@ -161,7 +163,7 @@ const ProductList = ({ products, handleDeleteProduct, setProducts }) => {
                     icon={<EditIcon />}
                     colorScheme="blue"
                     onClick={() => handleEdit(product)}
-                    aria-label="Edit"
+                    aria-label={`Edit ${product.name}`}
                   />
                 )}
               </Stack>
@@ -173,4 +175,4 @@ const ProductList = ({ products, handleDeleteProduct, setProducts }) => {
   );
 };
 
-export default ProductList;
+export default React.memo(ProductList);

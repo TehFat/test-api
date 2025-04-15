@@ -1,6 +1,15 @@
 
-import React, { createRef, useEffect } from "react";
-import { Box, Button, Input, Stack, FormLabel, useColorModeValue } from "@chakra-ui/react";
+import React, { useRef, useEffect } from "react";
+import {
+  Box,
+  Button,
+  Input,
+  Stack,
+  FormLabel,
+  useColorModeValue,
+  Flex,
+  useToast, 
+} from "@chakra-ui/react";
 
 const ProductForm = ({
   newProductName,
@@ -10,109 +19,146 @@ const ProductForm = ({
   newProductImage,
   setNewProductImage,
   handleAddProduct,
-  onResetForm
+  onResetForm,
 }) => {
-  const formRef = createRef(null);
+  const formRef = useRef(null);
+  const toast = useToast(); 
 
   useEffect(() => {
-    if (!newProductImage || newProductImage === "") {
-      if (formRef.current) {
-        formRef.current.reset();
-      }
+    if (!newProductImage && formRef.current) {
+      formRef.current.reset();
     }
-  }, [newProductImage,formRef.current])
+  }, [newProductImage]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    
+    if (
+        !newProductName.trim() ||
+        isNaN(newProductPrice) ||
+        newProductPrice <= 0 ||
+        !newProductImage
+    ) {
+      toast({
+        title: "Missing fields",
+        description: "Please fill in all the fields before submitting.",
+        status: "warning",
+        duration: 4000,
+        isClosable: true,
+        position: "top",
+      });
+      return;
+    }
+
+    
+    handleAddProduct();
+  };
+
   return (
-    <form ref={formRef} onSubmit={()=>{}}>
-    <Stack
-      bg={useColorModeValue("white", "gray.800")}
-      spacing={6}
-      mt={2}
-      align="center"
-      px={4}
-      py={6}
-      borderRadius="xl"
-      boxShadow="lg"
-      w={{ base: "100%", md: "80%", lg: "60%" }}
-      mx="auto"
-    >
-      {/* Product Name Field */}
-      <div className="w-full">
-        <FormLabel fontSize="20" fontWeight="bold" htmlFor="productName">
-          Product Name
-        </FormLabel>
-        <Input
-          id="productName"
-          placeholder="Enter product name"
-          value={newProductName}
-          onChange={(e) => setNewProductName(e.target.value)}
-          borderBottom="2px solid"
-          borderColor="blue.300"
-          paddingBottom="10px"
-          focusBorderColor="blue.500"
-          _placeholder={{
-            color: "blue.400",
-            paddingBottom: "4px",
-          }}
-        />
-      </div>
+    <form ref={formRef} onSubmit={handleSubmit}>
+      <Stack
+        bg={useColorModeValue("white", "gray.800")}
+        spacing={6}
+        mt={2}
+        align="center"
+        px={4}
+        py={6}
+        borderRadius="xl"
+        boxShadow="lg"
+        w={{ base: "100%", md: "80%", lg: "60%" }}
+        mx="auto"
+        role="form"
+      >
+        {/* Product Name */}
+        <Box w="100%">
+          <FormLabel htmlFor="productName">Product Name</FormLabel>
+          <Input
+            id="productName"
+            value={newProductName}
+            onChange={(e) => setNewProductName(e.target.value)}
+            placeholder="Enter product name"
+            borderBottom="2px solid"
+            borderColor="blue.600"
+            paddingBottom="10px"
+            focusBorderColor="blue.700"
+            _placeholder={{ color: "gray.600", paddingBottom: "4px" }}
+            required
+            aria-required="true"
+            aria-describedby="productNameDesc"
+          />
+        </Box>
 
-      {/* Product Price Field */}
-      <div>
-        <FormLabel fontSize="20" fontWeight="bold" htmlFor="productPrice">
-          Product Price
-        </FormLabel>
-        <Input
-          id="productPrice"
-          placeholder="Enter product price"
-          type="number"
-          value={newProductPrice === -1 ? "" : newProductPrice}
-          onChange={(e) => setNewProductPrice(e.target.value)}
-          borderBottom="2px solid"
-          borderColor="blue.300"
-          paddingBottom="8px"
-          focusBorderColor="blue.500"
-          _placeholder={{
-            color: "blue.400",
-            paddingBottom: "4px",
-          }}
-        />
-      </div>
+        {/* Product Price */}
+        <Box w="100%">
+          <FormLabel htmlFor="productPrice">Product Price</FormLabel>
+          <Input
+            id="productPrice"
+            type="number"
+            value={newProductPrice === -1 ? "" : newProductPrice}
+            onChange={(e) => setNewProductPrice(Number(e.target.value))}
+            placeholder="Enter product price"
+            borderBottom="2px solid"
+            borderColor="blue.600"
+            paddingBottom="8px"
+            focusBorderColor="blue.700"
+            _placeholder={{ color: "gray.600", paddingBottom: "4px" }}
+            required
+            aria-required="true"
+            min="0"
+          />
+        </Box>
 
-      {/* Product Image Field */}
-      <div>
-        <FormLabel fontSize="20" fontWeight="bold" htmlFor="productImage">
-          Product Image URL
-        </FormLabel>
+        {/* Product Image */}
+        <Box w="100%">
+          <FormLabel htmlFor="productImage">Product Image</FormLabel>
+          <Input
+            type="file"
+            accept="image/*"
+            id="productImage"
+            onChange={(e) => setNewProductImage(e.target.files[0])}
+            borderBottom="2px solid"
+            borderColor="blue.600"
+            paddingBottom="8px"
+            focusBorderColor="blue.700"
+            required
+            aria-required="true"
+          />
+        </Box>
 
-        <Input
-          type="file"
-          accept="image/*"
-          id="productImage"
-          placeholder="Enter image URL"
-          onChange={(e) => setNewProductImage(e.target.files[0])}
-          borderBottom="2px solid"
-          borderColor="blue.300"
-          paddingBottom="8px"
-          focusBorderColor="blue.500"
-          _placeholder={{
-            color: "blue.400",
-            paddingBottom: "4px",
-          }}
-        />
-      </div>
-      <Box >
-        {/* Add Button */}
-        <Button margin={8} colorScheme="blue" onClick={handleAddProduct} size="lg">
-          Add Product
-        </Button>
-        <Button margin={8} colorScheme="red" onClick={onResetForm} size="lg">
-          Clear
-        </Button>
-      </Box>
-    </Stack>
+        {/* Action Buttons */}
+        <Flex
+          direction={{ base: "column", md: "row" }}
+          justify="center"
+          align="center"
+          gap={4}
+          w="100%"
+        >
+          <Button
+            colorScheme="blue"
+            color="black"
+            type="submit"
+            size={{ base: "sm", md: "md", lg: "lg" }}
+            w={{ base: "100%", md: "auto" }}
+            aria-label="Add product"
+          >
+            Add Product
+          </Button>
+          <Button
+            colorScheme="red"
+            color="black"
+            onClick={onResetForm}
+            size={{ base: "sm", md: "md", lg: "lg" }}
+            type="button"
+            w={{ base: "100%", md: "auto" }}
+            aria-label="Clear form"
+          >
+            Clear
+          </Button>
+        </Flex>
+      </Stack>
     </form>
   );
 };
 
-export default ProductForm;
-
+export default React.memo(ProductForm);
