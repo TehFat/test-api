@@ -6,6 +6,7 @@ import { keyframes } from "@emotion/react";
 import { Box, Text } from "@chakra-ui/react";
 import ProductForm from "./components/ProductForm";
 import ProductList from "./components/ProductList";
+import { readFileAsDataUrl } from "./Helper/file-hepler.js";
 
 const gradient = keyframes`
   0% { background-position: 0% 50%; }
@@ -28,14 +29,14 @@ const App = () => {
       .catch((err) => console.error("Fetch error:", err));
   }, []);
 
-  const handleAddProduct = () => {
+  const handleAddProduct = async () => {
     if (!newProductName || !newProductPrice || newProductPrice === -1 || !newProductImage) return;
-
+    const fileData = await readFileAsDataUrl(newProductImage)
     axios
       .post(API_BASE, {
         name: newProductName,
         price: newProductPrice,
-        image: newProductImage,
+        image: fileData,
       })
       .then((res) => {
         setProducts((prev) => [...prev, res.data.data]);
@@ -45,6 +46,12 @@ const App = () => {
       })
       .catch((err) => console.error("Add error:", err));
   };
+  const resetForm = () => {
+    setNewProductName("");
+    setNewProductPrice(-1);
+    setNewProductImage("");
+
+  }
 
   const handleDeleteProduct = (id) => {
     axios
@@ -53,15 +60,15 @@ const App = () => {
       .catch((err) => console.error("Delete error:", err));
   };
 
-  return (
-    <Box  py={12} borderRadius="lg" p={4}  bgGradient="linear(to-r, teal.100, blue.100, pink.100)"
-    backgroundSize="400% 400%"
-    animation={`${gradient} 15s ease infinite`} mt={5}>
+  return (<>
+    <Box py={12} borderRadius="lg" p={4} bgGradient="linear(to-r, teal.100, blue.100, pink.100)"
+      backgroundSize="400% 400%"
+      animation={`${gradient} 15s ease infinite`} mt={5}>
       <Text fontSize="30" fontWeight="bold" textAlign="center">
         Product Management
       </Text>
-      <Text  py={5} fontSize="25" fontWeight="bold" textAlign="center">
-      Create Products List
+      <Text py={5} fontSize="25" fontWeight="bold" textAlign="center">
+        Create Products List
       </Text>
 
       <ProductForm
@@ -72,11 +79,12 @@ const App = () => {
         newProductImage={newProductImage}
         setNewProductImage={setNewProductImage}
         handleAddProduct={handleAddProduct}
-       
+        onResetForm={resetForm}
       />
 
       <ProductList products={products} handleDeleteProduct={handleDeleteProduct} setProducts={setProducts} />
     </Box>
+  </>
   );
 };
 
