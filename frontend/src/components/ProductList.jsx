@@ -1,5 +1,4 @@
-
-import React, { useState, useCallback,useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import axios from "axios";
 import {
   Box,
@@ -13,17 +12,10 @@ import {
   Heading,
 } from "@chakra-ui/react";
 import { DeleteIcon, EditIcon, CheckIcon, CloseIcon } from "@chakra-ui/icons";
-
 import config from "../config";
 
-const ProductList = ({ handleDeleteProduct }) => {
-  const [products, setProducts] = useState([]);
-  useEffect(() => {
-    axios
-      .get(config.API_BASE)
-      .then((res) => setProducts(res.data.data || []))
-      .catch((err) => console.error("Fetch error:", err));
-  }, []);
+//  Accept products and setProducts as props
+const ProductList = ({ products, setProducts, handleDeleteProduct }) => {
   const [editingId, setEditingId] = useState(null);
   const [editedProduct, setEditedProduct] = useState({
     name: "",
@@ -42,7 +34,7 @@ const ProductList = ({ handleDeleteProduct }) => {
 
   const handleSave = useCallback(() => {
     axios
-      .put(`http://localhost:5000/api/products/${editingId}`, editedProduct)
+      .put(`${config.API_BASE}/${editingId}`, editedProduct)
       .then((res) => {
         const updated = res.data.data;
         const updatedList = products.map((p) =>

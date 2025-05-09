@@ -26,7 +26,8 @@ const App = () => {
   const [newProductName, setNewProductName] = useState("");
   const [newProductPrice, setNewProductPrice] = useState(-1);
   const [newProductImage, setNewProductImage] = useState("");
-
+  const [products, setProducts] = useState([]);
+  
   useEffect(() => {
     axios
       .get(config.API_BASE)
@@ -85,7 +86,12 @@ const App = () => {
         onResetForm={resetForm}
       />
 
-      <ProductList handleDeleteProduct={handleDeleteProduct} />
+      {/* <ProductList handleDeleteProduct={handleDeleteProduct} /> */}
+      <ProductList
+          products={products}
+          setProducts={setProducts}
+          handleDeleteProduct={handleDeleteProduct}
+        />
     </Box>
   </>
   );

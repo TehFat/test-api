@@ -1,22 +1,28 @@
+
 import mongoose from "mongoose"; 
 
 const productSchema = new mongoose.Schema({
-    name:{
+    name: {
         type: String,
         required: true
     },
-    price:{
+    price: {
         type: Number,
         required: true
     },
-    image:{
+    image: {
         type: String,
         required: true
     },
+    deleted: {
+        type: Boolean,
+        default: false  // New field for soft delete
+    }
 }, {
     timestamps: true 
 });
 
-const Product = mongoose.model('Produt', productSchema);
+// 🔧 Fix the typo in model name here:
+const Product = mongoose.model('Product', productSchema);
 
 export default Product;
